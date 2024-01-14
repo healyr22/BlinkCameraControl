@@ -1,32 +1,65 @@
 package com.robware.blink;
 
-public class LoginApi extends AbstractApi {
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.robware.json.JsonMapper;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+
+public class LoginApi implements IBlinkApi {
+
+    public record Body(String unique_id, String email, String password, boolean reauth) {}
 
     public record Response(Account account, Auth auth) {
-        record Account(String account_id, String client_id, String tier, boolean client_verification_required) {}
-        record Auth(String token) {}
+        public record Account(String account_id, String client_id, String tier, boolean client_verification_required) {}
+        public record Auth(String token) {}
     }
 
     public static String NAME = "LOGIN_API";
-    public static String LOGIN_API = "/api/v5/account/login";
+    public static String LOGIN_API = BlinkConstants.PROD_URL + "/api/v5/account/login";
+
+    private final Body body;
+
+    public LoginApi(Body body) {
+        this.body = body;
+    }
 
     @Override
-    String getName() {
+    public String getName() {
         return NAME;
     }
 
     @Override
-    String getApiUrl() {
+    public String getApiUrl() {
         return LOGIN_API;
     }
 
     @Override
-    HttpMethod getMethod() {
+    public HttpMethod getMethod() {
         return HttpMethod.POST;
     }
 
     @Override
-    String[] getHeaders() {
+    public String[] getHeaders() {
         return BlinkConstants.CONTENT_TYPE_JSON;
+    }
+
+    @Override
+    public String getBody() {
+        try {
+            return JsonMapper.mapper().writeValueAsString(this.body);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Class<Response> getResponseClass() {
+        return Response.class;
     }
 }

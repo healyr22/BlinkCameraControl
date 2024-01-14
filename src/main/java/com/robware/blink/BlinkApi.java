@@ -1,23 +1,20 @@
 package com.robware.blink;
 
-import com.robware.models.LoginDetails;
-
-import java.net.URI;
-import java.net.http.HttpClient;
+import com.robware.models.BlinkState;
 
 public class BlinkApi {
 
-    private final LoginDetails loginDetails;
+    private final BlinkState blinkState;
 
     public BlinkApi() {
-        this.loginDetails = login();
+        this.blinkState = login();
     }
 
-    public BlinkApi(LoginDetails loginDetails) {
-        this.loginDetails = loginDetails;
+    public BlinkApi(BlinkState blinkState) {
+        this.blinkState = blinkState;
     }
 
-    public static LoginDetails login() {
+    public static BlinkState login() {
         return null;
 
     }

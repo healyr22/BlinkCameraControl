@@ -2,24 +2,28 @@ package com.robware.blink;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.robware.json.JsonMapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractApi<ResponseT> {
+public interface IBlinkApi {
 
-    public ResponseT call() {
+    default <ResponseT> ResponseT call() {
         HttpClient httpClient = HttpClient.newHttpClient();
 
         String apiUrl = getApiUrl();
         URI uri = URI.create(apiUrl);
 
+        var body = getBody();
+        var bodyPublisher = body == null ? null : HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .headers(getHeaders())
-                .method(getMethod().name(), null)
+                .method(getMethod().name(), bodyPublisher)
                 .build();
 
         try {
@@ -32,19 +36,25 @@ public abstract class AbstractApi<ResponseT> {
             System.out.println("Status Code: " + statusCode);
             System.out.println("Response Body: " + responseBody);
 
-            TypeReference<ResponseT> typeRef = new TypeReference<>() {};
-            return new ObjectMapper().readValue(responseBody, typeRef);
+            return JsonMapper.mapper().readValue(responseBody, getResponseClass());
 
         } catch (Exception e) {
             throw new RuntimeException("Error calling api: " + getName(), e);
         }
     }
 
-    abstract String getName();
+    <T> Class<T> getResponseClass();
 
-    abstract String getApiUrl();
+    String getName();
 
-    abstract HttpMethod getMethod();
-    abstract String[] getHeaders();
+    String getApiUrl();
+
+    HttpMethod getMethod();
+
+    String[] getHeaders();
+
+    default String getBody() {
+        return null;
+    }
 
 }

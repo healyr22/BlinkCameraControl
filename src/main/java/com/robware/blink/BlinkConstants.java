@@ -36,5 +36,6 @@ public class BlinkConstants {
 
     // Headers
     public static String[] CONTENT_TYPE_JSON = new String[] {"Content-Type", "application/json"};
+    public static String AUTH_HEADER = "token-auth";
 
 }
