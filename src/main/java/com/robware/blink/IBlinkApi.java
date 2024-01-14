@@ -18,13 +18,16 @@ public interface IBlinkApi {
         String apiUrl = getApiUrl();
         URI uri = URI.create(apiUrl);
 
-        var body = getBody();
-        var bodyPublisher = body == null ? null : HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8);
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(uri)
-                .headers(getHeaders())
-                .method(getMethod().name(), bodyPublisher)
-                .build();
+                .headers(getHeaders());
+
+        switch(getMethod()) {
+            case POST -> requestBuilder.POST(HttpRequest.BodyPublishers.ofString(getBody(), StandardCharsets.UTF_8));
+            case GET -> requestBuilder.GET();
+        }
+
+        HttpRequest request = requestBuilder.build();
 
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

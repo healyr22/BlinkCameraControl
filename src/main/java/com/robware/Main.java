@@ -1,5 +1,6 @@
 package com.robware;
 
+import com.robware.blink.HomeScreenApi;
 import com.robware.blink.LoginApi;
 import com.robware.blink.VerifyClientApi;
 import com.robware.json.JsonMapper;
@@ -20,11 +21,11 @@ public class Main {
     public static void main(String[] args) throws IOException {
         System.out.println("Starting program");
 
-        BlinkState blinkState = getBlinkState();
-
+        Scanner s = new Scanner(System.in);
+        BlinkState blinkState = getBlinkState(s);
     }
 
-    static BlinkState getBlinkState() {
+    static BlinkState getBlinkState(Scanner s) {
         try {
             return JsonMapper.mapper().readValue(new File(STATE_FILE_NAME), BlinkState.class);
         } catch(FileNotFoundException e) {
@@ -34,8 +35,8 @@ public class Main {
         }
 
         var uuid = UUID.randomUUID().toString();
-        var email = getInput("Please enter your Blink account email address:");
-        var password = getInput("Please enter your password:");
+        var email = getInput(s, "Please enter your Blink account email address:");
+        var password = getInput(s, "Please enter your password:");
 
         var loginApi = new LoginApi(new LoginApi.Body(
                 uuid,
@@ -43,8 +44,18 @@ public class Main {
                 password,
                 true
         ));
-        LoginApi.Response response = loginApi.call();
-        var blinkState = new BlinkState(response.auth().token(), uuid, response.account().account_id(), response.account().client_id(), response.account().tier());
+        LoginApi.Response loginResponse = loginApi.call();
+
+        if(loginResponse.account().client_verification_required()) {
+            String pin = getInput(s, "Please enter the code sent to your email or phone:");
+            var verifyApi = new VerifyClientApi(loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), loginResponse.auth().token(), new VerifyClientApi.Body(pin));
+            verifyApi.call();
+        }
+
+        HomeScreenApi hsApi = new HomeScreenApi(loginResponse.account().account_id(), loginResponse.account().tier(), loginResponse.auth().token());
+        HomeScreenApi.Response hsResponse = hsApi.call();
+
+        var blinkState = new BlinkState(loginResponse.auth().token(), uuid, loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), hsResponse.networks().get(0).id());
 
         try {
             String stateString = JsonMapper.mapper().writeValueAsString(blinkState);
@@ -57,19 +68,13 @@ public class Main {
             throw new RuntimeException("Unable to write file", e);
         }
 
-        if(response.account().client_verification_required()) {
-            String pin = getInput("Please enter the code sent to your email or phone:");
-            var verifyApi = new VerifyClientApi(blinkState, new VerifyClientApi.Body(pin));
-            verifyApi.call();
-        }
 
+        s.close();
         return blinkState;
     }
 
-    static String getInput(String msg) {
+    static String getInput(Scanner s, String msg) {
         System.out.println(msg);
-        try(Scanner s = new Scanner(System.in)) {
-            return s.nextLine();
-        }
+        return s.nextLine();
     }
 }

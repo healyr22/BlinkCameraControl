@@ -13,11 +13,14 @@ public class VerifyClientApi implements IBlinkApi {
 
     public static String NAME = "VERIFY_CLIENT_API";
 
-    private final BlinkState state;
+    private final String accountId, clientId, tier, authToken;
     private final Body body;
 
-    public VerifyClientApi(BlinkState state, Body body) {
-        this.state = state;
+    public VerifyClientApi(String accountId, String clientId, String tier, String authToken, Body body) {
+        this.accountId = accountId;
+        this.clientId = clientId;
+        this.tier = tier;
+        this.authToken = authToken;
         this.body = body;
     }
 
@@ -28,11 +31,11 @@ public class VerifyClientApi implements IBlinkApi {
 
     @Override
     public String getApiUrl() {
-        return BlinkConstants.getTierUrl(state.tier()) +
+        return BlinkConstants.getTierUrl(tier) +
                 "/api/v4/account/" +
-                state.account_id() +
+                accountId +
                 "/client/" +
-                state.client_id() +
+                clientId +
                 "/pin/verify";
     }
 
@@ -45,7 +48,7 @@ public class VerifyClientApi implements IBlinkApi {
     public String[] getHeaders() {
         var headers = new ArrayList<>(List.of(BlinkConstants.CONTENT_TYPE_JSON));
         headers.add(BlinkConstants.AUTH_HEADER);
-        headers.add(this.state.authToken());
+        headers.add(authToken);
         return headers.toArray(new String[4]);
     }
 
