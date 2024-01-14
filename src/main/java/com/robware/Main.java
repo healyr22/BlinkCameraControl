@@ -2,12 +2,14 @@ package com.robware;
 
 import com.robware.blink.HomeScreenApi;
 import com.robware.blink.LoginApi;
+import com.robware.blink.NetworkStateApi;
 import com.robware.blink.VerifyClientApi;
 import com.robware.json.JsonMapper;
 import com.robware.models.BlinkState;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -21,8 +23,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
         System.out.println("Starting program");
 
-        Scanner s = new Scanner(System.in);
-        BlinkState blinkState = getBlinkState(s);
+        try(Scanner s = new Scanner(System.in)) {
+            BlinkState blinkState = getBlinkState(s);
+
+            String action = getInput(s, "Enter an action (arm/disarm):");
+            if (action.equals("arm") || action.equals("disarm")) {
+                new NetworkStateApi(blinkState, action).call();
+            } else {
+                System.out.println("Unknown action");
+            }
+        }
     }
 
     static BlinkState getBlinkState(Scanner s) {
@@ -68,8 +78,6 @@ public class Main {
             throw new RuntimeException("Unable to write file", e);
         }
 
-
-        s.close();
         return blinkState;
     }
 

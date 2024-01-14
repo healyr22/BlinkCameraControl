@@ -1,7 +1,5 @@
 package com.robware.blink;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.robware.json.JsonMapper;
 
 import java.net.URI;
@@ -18,16 +16,17 @@ public interface IBlinkApi {
         String apiUrl = getApiUrl();
         URI uri = URI.create(apiUrl);
 
-        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(uri)
-                .headers(getHeaders());
-
-        switch(getMethod()) {
-            case POST -> requestBuilder.POST(HttpRequest.BodyPublishers.ofString(getBody(), StandardCharsets.UTF_8));
-            case GET -> requestBuilder.GET();
+        var body = getBody();
+        if(body == null) {
+            body = "";
         }
+        var bodyPublisher = HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8);
 
-        HttpRequest request = requestBuilder.build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(uri)
+                .method(getMethod().name(), bodyPublisher)
+                .headers(getHeaders())
+                .build();
 
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
