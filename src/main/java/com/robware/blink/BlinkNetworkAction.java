@@ -1,12 +1,12 @@
 package com.robware.blink;
 
-public enum NetworkAction {
+public enum BlinkNetworkAction {
     ARM("arm"),
     DISARM("disarm");
 
     private String urlString;
 
-    NetworkAction(String urlString) {
+    BlinkNetworkAction(String urlString) {
         this.urlString = urlString;
     }
 

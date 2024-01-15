@@ -1,22 +1,19 @@
 package com.robware;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.robware.blink.LoginApi;
 import com.robware.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 public class TempTest {
+
+    record Tempy(String hello, Boolean isbool){}
 
     @Test
     public void test() throws Exception {
-        var result = JsonMapper.mapper().readValue(content, Map.class);
+        var str = """
+                {"hello": "value"}""";
+        var result = JsonMapper.mapper().readValue(str, Tempy.class);
 
-        System.out.println("Got result: " + result.get("account"));
+        System.out.println("Got result: " + result);
     }
 
     static final String content = """

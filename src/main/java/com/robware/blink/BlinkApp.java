@@ -1,37 +1,45 @@
-package com.robware;
+package com.robware.blink;
 
-import com.robware.blink.HomeScreenApi;
-import com.robware.blink.LoginApi;
-import com.robware.blink.NetworkStateApi;
-import com.robware.blink.VerifyClientApi;
 import com.robware.json.JsonMapper;
 import com.robware.models.BlinkState;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Scanner;
 import java.util.UUID;
 
-public class Main {
+public class BlinkApp {
 
     private static final String STATE_FILE_NAME = "state.json";
 
-    public static void main(String[] args) throws IOException {
-        System.out.println("Starting program");
+    public static void update(BlinkNetworkAction updateAction) {
+        System.out.println("Starting BlinkApp - action: " + updateAction);
 
         try(Scanner s = new Scanner(System.in)) {
             BlinkState blinkState = getBlinkState(s);
 
-            String action = getInput(s, "Enter an action (arm/disarm):");
-            if (action.equals("arm") || action.equals("disarm")) {
-                new NetworkStateApi(blinkState, action).call();
-            } else {
-                System.out.println("Unknown action");
+            if(blinkState.previousAction() == updateAction) {
+                System.out.println("Duplicate action - exiting");
+                return;
             }
+
+            System.out.println("Executing action: " + updateAction);
+            new NetworkStateApi(blinkState, updateAction.getUrlString()).call();
+
+            // Update state
+            saveState(new BlinkState(
+                    blinkState.authToken(),
+                    blinkState.uuid(),
+                    blinkState.accountId(),
+                    blinkState.clientId(),
+                    blinkState.tier(),
+                    blinkState.networkId(),
+                    updateAction));
+
+            System.out.println("Complete!");
         }
     }
 
@@ -62,13 +70,29 @@ public class Main {
             verifyApi.call();
         }
 
-        HomeScreenApi hsApi = new HomeScreenApi(loginResponse.account().account_id(), loginResponse.account().tier(), loginResponse.auth().token());
+        HomeScreenApi hsApi = new HomeScreenApi(
+                loginResponse.account().account_id(),
+                loginResponse.account().tier(),
+                loginResponse.auth().token());
+
         HomeScreenApi.Response hsResponse = hsApi.call();
 
-        var blinkState = new BlinkState(loginResponse.auth().token(), uuid, loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), hsResponse.networks().get(0).id());
+        var blinkState = new BlinkState(
+                loginResponse.auth().token(),
+                uuid,
+                loginResponse.account().account_id(),
+                loginResponse.account().client_id(),
+                loginResponse.account().tier(),
+                hsResponse.networks().get(0).id(),
+                null);
+        saveState(blinkState);
 
+        return blinkState;
+    }
+
+    static void saveState(BlinkState state) {
         try {
-            String stateString = JsonMapper.mapper().writeValueAsString(blinkState);
+            String stateString = JsonMapper.mapper().writeValueAsString(state);
             Files.writeString(
                     Paths.get(STATE_FILE_NAME),
                     stateString,
@@ -77,8 +101,6 @@ public class Main {
         } catch(Exception e) {
             throw new RuntimeException("Unable to write file", e);
         }
-
-        return blinkState;
     }
 
     static String getInput(Scanner s, String msg) {

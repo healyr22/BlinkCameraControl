@@ -24,7 +24,7 @@ public class BlinkConstants {
                 "/homescreen";
     }
 
-    public static String getNetworkActionApi(String accountId, String networkId, NetworkAction action) {
+    public static String getNetworkActionApi(String accountId, String networkId, BlinkNetworkAction action) {
         return "/api/v1/accounts/" +
                 accountId +
                 "/networks/" +
