@@ -19,7 +19,7 @@ public class BlinkApp {
         System.out.println("Starting BlinkApp - action: " + updateAction);
 
         try(Scanner s = new Scanner(System.in)) {
-            BlinkState blinkState = getBlinkState(s);
+            BlinkState blinkState = initBlinkState(s);
 
             if(blinkState.previousAction() == updateAction) {
                 System.out.println("Duplicate action - exiting");
@@ -43,7 +43,7 @@ public class BlinkApp {
         }
     }
 
-    static BlinkState getBlinkState(Scanner s) {
+    static BlinkState initBlinkState(Scanner s) {
         try {
             return JsonMapper.mapper().readValue(new File(STATE_FILE_NAME), BlinkState.class);
         } catch(FileNotFoundException e) {
