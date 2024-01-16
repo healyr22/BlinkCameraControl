@@ -1,7 +1,4 @@
 package com.robware.blink;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.robware.json.JsonMapper;
 import com.robware.models.BlinkState;
 
 import java.util.ArrayList;
@@ -10,12 +7,9 @@ import java.util.List;
 public class NetworkStateApi implements IBlinkApi {
 
     public static String NAME = "NETWORK_STATE_API";
-
-    private final BlinkState state;
     private final String action;
 
-    public NetworkStateApi(BlinkState state, String action) {
-        this.state = state;
+    public NetworkStateApi(String action) {
         this.action = action;
     }
 
@@ -26,11 +20,12 @@ public class NetworkStateApi implements IBlinkApi {
 
     @Override
     public String getApiUrl() {
-        return BlinkConstants.getTierUrl(state.tier()) +
+        final var state = BlinkState.get();
+        return BlinkConstants.getTierUrl(state.getTier()) +
                 "/api/v1/accounts/" +
-                state.accountId() +
+                state.getAccountId() +
                 "/networks/" +
-                state.networkId() +
+                state.getNetworkId() +
                 "/state/" +
                 action;
     }
@@ -42,9 +37,10 @@ public class NetworkStateApi implements IBlinkApi {
 
     @Override
     public String[] getHeaders() {
+        final var state = BlinkState.get();
         var headers = new ArrayList<>(List.of(BlinkConstants.CONTENT_TYPE_JSON));
         headers.add(BlinkConstants.AUTH_HEADER);
-        headers.add(state.authToken());
+        headers.add(state.getAuthToken());
         return headers.toArray(new String[4]);
     }
 
