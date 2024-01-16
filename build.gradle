@@ -1,5 +1,11 @@
 plugins {
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id("java")
+    id("application")
+}
+
+application {
+    mainClass = "com.robware.cmd.Monitor"
 }
 
 group = "com.robware"
