@@ -21,7 +21,6 @@ public interface IBlinkApi {
             Pair<Integer, String> response = call0();
             if(response.getValue0() == 401 && !getName().equals(LoginApi.NAME)) {
                 System.out.println("Token has expired - refreshing token");
-                // TODO fetch credentials from secure storage
 
                 final String uuid = BlinkState.get().getUuid();
 
