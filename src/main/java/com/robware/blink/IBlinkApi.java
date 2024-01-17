@@ -14,7 +14,14 @@ import java.nio.charset.StandardCharsets;
 
 public interface IBlinkApi {
 
+    int MAX_RETRIES = 4;
+    int RETRY_COOLDOWN_SECONDS = 30;
+
     default <ResponseT> ResponseT call() {
+        return callWithRetries(0);
+    }
+
+    private <ResponseT> ResponseT callWithRetries(int retryCount) {
         // Call API and retry in case token is expired
 
         try {
@@ -46,9 +53,21 @@ public interface IBlinkApi {
                 return JsonMapper.mapper().readValue(response.getValue1(), getResponseClass());
             }
 
-            throw new RuntimeException("Error response from API");
+            // Error response
+            if(retryCount < MAX_RETRIES) {
+                // Wait then retry call
+                System.out.println("Request failed. Will retry in " + RETRY_COOLDOWN_SECONDS + " seconds...");
+                Thread.sleep(RETRY_COOLDOWN_SECONDS * 1000);
+                System.out.println("Retrying " + (MAX_RETRIES-retryCount) + " more time(s)...");
+                return callWithRetries(retryCount + 1);
+            }
+
+            throw new RuntimeException("Error response from API. Code: " + response.getValue0() + " - Response: " + response.getValue1());
+
         } catch(JsonProcessingException e) {
             throw new RuntimeException("Error parsing JSON response", e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
