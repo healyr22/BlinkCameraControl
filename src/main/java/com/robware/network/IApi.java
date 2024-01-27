@@ -1,9 +1,8 @@
-package com.robware.blink;
+package com.robware.network;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.robware.exception.NetworkException;
 import com.robware.json.JsonMapper;
-import com.robware.models.BlinkState;
-import com.robware.util.InputUtil;
 import org.javatuples.Pair;
 
 import java.net.URI;
@@ -12,7 +11,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-public interface IBlinkApi {
+public interface IApi {
 
     int MAX_RETRIES = 4;
     int RETRY_COOLDOWN_SECONDS = 30;
@@ -26,27 +25,12 @@ public interface IBlinkApi {
 
         try {
             Pair<Integer, String> response = call0();
-            if(response.getValue0() == 401 && !getName().equals(LoginApi.NAME)) {
-                System.out.println("Token has expired - refreshing token");
-
-                final String uuid = BlinkState.get().getUuid();
-
-                var email = InputUtil.getInput("Please enter your Blink account email address:");
-                var password = InputUtil.getInput("Please enter your password:");
-
-                var loginApi = new LoginApi(new LoginApi.Body(
-                        uuid,
-                        email,
-                        password,
-                        true
-                ));
-                LoginApi.Response loginResponse = loginApi.call();
-
-                // Update token
-                BlinkState.updateAuthToken(loginResponse.auth().token());
-
-                System.out.println("Successfully refreshed token, retrying call...");
-                response = call0();
+            if(response.getValue0() == 401) {
+                // Unauthorized - try to refresh auth
+                if(refreshAuth()) {
+                    System.out.println("Attempting to refresh auth...");
+                    response = call0();
+                }
             }
 
             if (response.getValue0() == 200) {
@@ -54,7 +38,7 @@ public interface IBlinkApi {
             }
 
             // Error response
-            if(retryCount < MAX_RETRIES) {
+            if(!response.getValue0().toString().startsWith("4") && retryCount < MAX_RETRIES) {
                 // Wait then retry call
                 System.out.println("Request failed. Will retry in " + RETRY_COOLDOWN_SECONDS + " seconds...");
                 Thread.sleep(RETRY_COOLDOWN_SECONDS * 1000);
@@ -62,7 +46,7 @@ public interface IBlinkApi {
                 return callWithRetries(retryCount + 1);
             }
 
-            throw new RuntimeException("Error response from API. Code: " + response.getValue0() + " - Response: " + response.getValue1());
+            throw new NetworkException(response.getValue0(), "Error response from API. Code: " + response.getValue0() + " - Response: " + response.getValue1());
 
         } catch(JsonProcessingException e) {
             throw new RuntimeException("Error parsing JSON response", e);
@@ -118,6 +102,10 @@ public interface IBlinkApi {
 
     default String getBody() {
         return null;
+    }
+
+    default boolean refreshAuth() {
+        return false;
     }
 
 }

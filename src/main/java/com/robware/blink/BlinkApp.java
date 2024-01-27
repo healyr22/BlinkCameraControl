@@ -13,7 +13,7 @@ public class BlinkApp {
         }
 
         System.out.println("Executing action: " + updateAction);
-        new NetworkStateApi(updateAction.getUrlString()).call();
+        new BlinkNetworkStateApi(updateAction.getUrlString()).call();
 
         // Update state
         BlinkState.updateAction(updateAction);

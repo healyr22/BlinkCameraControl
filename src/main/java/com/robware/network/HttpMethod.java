@@ -1,4 +1,4 @@
-package com.robware.blink;
+package com.robware.network;
 
 public enum HttpMethod {
     GET,

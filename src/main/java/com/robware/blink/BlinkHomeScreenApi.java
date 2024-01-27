@@ -1,10 +1,10 @@
 package com.robware.blink;
 
-import com.robware.models.BlinkState;
+import com.robware.network.HttpMethod;
 
 import java.util.List;
 
-public class HomeScreenApi implements IBlinkApi {
+public class BlinkHomeScreenApi extends AbstractBlinkApi {
 
     public record Response(List<Network> networks) {
         public record Network(String id) {}
@@ -14,7 +14,7 @@ public class HomeScreenApi implements IBlinkApi {
 
     private final String accountId, tier, authToken;
 
-    public HomeScreenApi(String accountId, String tier, String authToken) {
+    public BlinkHomeScreenApi(String accountId, String tier, String authToken) {
         this.accountId = accountId;
         this.tier = tier;
         this.authToken = authToken;

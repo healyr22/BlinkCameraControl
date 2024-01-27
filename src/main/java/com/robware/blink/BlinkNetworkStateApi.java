@@ -1,15 +1,16 @@
 package com.robware.blink;
 import com.robware.models.BlinkState;
+import com.robware.network.HttpMethod;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkStateApi implements IBlinkApi {
+public class BlinkNetworkStateApi extends AbstractBlinkApi {
 
     public static String NAME = "NETWORK_STATE_API";
     private final String action;
 
-    public NetworkStateApi(String action) {
+    public BlinkNetworkStateApi(String action) {
         this.action = action;
     }
 
