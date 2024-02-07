@@ -1,13 +1,23 @@
 package com.robware.blink;
 
 import com.robware.network.HttpMethod;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 
 public class BlinkHomeScreenApi extends AbstractBlinkApi {
 
-    public record Response(List<Network> networks) {
-        public record Network(String id) {}
+    @AllArgsConstructor
+    @Getter
+    public static class Response {
+        private List<Network> networks;
+
+        @AllArgsConstructor
+        @Getter
+        public static class Network {
+            private String id;
+        }
     }
 
     public static String NAME = "HOME_SCREEN_API";

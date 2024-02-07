@@ -3,14 +3,36 @@ package com.robware.blink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.robware.json.JsonMapper;
 import com.robware.network.HttpMethod;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 public class BlinkLoginApi extends AbstractBlinkApi {
 
-    public record Body(String unique_id, String email, String password, boolean reauth) {}
+    @AllArgsConstructor
+    @Getter
+    public static class Body {
+        private String unique_id, email, password;
+        private boolean reauth;
+    }
 
-    public record Response(Account account, Auth auth) {
-        public record Account(String account_id, String client_id, String tier, boolean client_verification_required) {}
-        public record Auth(String token) {}
+    @AllArgsConstructor
+    @Getter
+    public static class Response {
+        private Account account;
+        private Auth auth;
+
+        @AllArgsConstructor
+        @Getter
+        public static class Account {
+            private String account_id, client_id, tier;
+            boolean client_verification_required;
+        }
+
+        @AllArgsConstructor
+        @Getter
+        public static class Auth {
+            private String token;
+        }
     }
 
     public static String NAME = "BLINK_LOGIN_API";

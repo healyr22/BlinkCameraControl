@@ -28,7 +28,7 @@ public abstract class AbstractBlinkApi implements IApi {
         BlinkLoginApi.Response loginResponse = loginApi.call();
 
         // Update token
-        BlinkState.updateAuthToken(loginResponse.auth().token());
+        BlinkState.updateAuthToken(loginResponse.getAuth().getToken());
 
         System.out.println("Successfully refreshed token");
         return true;

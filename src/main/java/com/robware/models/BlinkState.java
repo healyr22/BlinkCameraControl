@@ -80,26 +80,31 @@ public class BlinkState {
         ));
         BlinkLoginApi.Response loginResponse = loginApi.call();
 
-        if(loginResponse.account().client_verification_required()) {
+        if(loginResponse.getAccount().isClient_verification_required()) {
             String pin = InputUtil.getInput("Please enter the code sent to your email or phone:");
-            var verifyApi = new BlinkVerifyClientApi(loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), loginResponse.auth().token(), new BlinkVerifyClientApi.Body(pin));
+            var verifyApi = new BlinkVerifyClientApi(
+                    loginResponse.getAccount().getAccount_id(),
+                    loginResponse.getAccount().getClient_id(),
+                    loginResponse.getAccount().getTier(),
+                    loginResponse.getAuth().getToken(),
+                    new BlinkVerifyClientApi.Body(pin));
             verifyApi.call();
         }
 
         BlinkHomeScreenApi hsApi = new BlinkHomeScreenApi(
-                loginResponse.account().account_id(),
-                loginResponse.account().tier(),
-                loginResponse.auth().token());
+                loginResponse.getAccount().getAccount_id(),
+                loginResponse.getAccount().getTier(),
+                loginResponse.getAuth().getToken());
 
         BlinkHomeScreenApi.Response hsResponse = hsApi.call();
 
         var blinkState = new BlinkState(
-                loginResponse.auth().token(),
+                loginResponse.getAuth().getToken(),
                 uuid,
-                loginResponse.account().account_id(),
-                loginResponse.account().client_id(),
-                loginResponse.account().tier(),
-                hsResponse.networks().get(0).id(),
+                loginResponse.getAccount().getAccount_id(),
+                loginResponse.getAccount().getClient_id(),
+                loginResponse.getAccount().getTier(),
+                hsResponse.getNetworks().get(0).getId(),
                 null);
         BlinkState.set(blinkState);
 

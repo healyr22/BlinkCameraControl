@@ -3,13 +3,19 @@ package com.robware.blink;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.robware.json.JsonMapper;
 import com.robware.network.HttpMethod;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlinkVerifyClientApi extends AbstractBlinkApi {
 
-    public record Body(String pin) {}
+    @AllArgsConstructor
+    @Getter
+    public static class Body {
+        private String pin;
+    }
 
     public static String NAME = "VERIFY_CLIENT_API";
 
