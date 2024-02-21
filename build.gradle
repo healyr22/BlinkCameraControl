@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClass = "com.robware.cmd.Monitor"
+    mainClass = "com.robware.Monitor"
 }
 
 group = "com.robware"
