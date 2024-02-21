@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Monitor {
 
@@ -66,7 +68,17 @@ public class Monitor {
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             boolean isDeviceOnline = false;
-            while ((line = reader.readLine()) != null) {
+            List<String> lines = new ArrayList<>();
+            while ((line = reader.readLine()) != null && lines.size() < 10) {
+                lines.add(line);
+                if(line.toLowerCase().contains("bytes from " + DEVICE_IP)) {
+                    isDeviceOnline = true;
+                    break;
+                }
+                if(line.toLowerCase().contains("request timeout") || line.toLowerCase().contains("request timed out")) {
+                    isDeviceOnline = false;
+                    break;
+                }
                 if (line.toLowerCase().startsWith("reply")) {
                     // Device is online
                     isDeviceOnline = !line.toLowerCase().contains("unreachable");
@@ -74,8 +86,12 @@ public class Monitor {
                 }
             } ///// CANNOT RELY ON STATE FOR ARMED - need to check? Maybe execute only if we did it last or something...
 
-            // Wait for the process to finish
-            int exitCode = process.waitFor();
+            if(lines.size() >= 10) {
+                throw new RuntimeException("Couldn't determine if device was online. Input lines read: " + lines);
+            }
+
+            // End process
+            process.destroy();
             System.out.println("Complete. Device online = " + isDeviceOnline);
             return isDeviceOnline;
 
