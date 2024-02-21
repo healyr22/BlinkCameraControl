@@ -2,8 +2,10 @@ package com.robware.blink;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.robware.json.JsonMapper;
+import com.robware.network.HttpMethod;
+import com.robware.util.Constants;
 
-public class LoginApi implements IBlinkApi {
+public class BlinkLoginApi extends AbstractBlinkApi {
 
     public record Body(String unique_id, String email, String password, boolean reauth) {}
 
@@ -12,12 +14,12 @@ public class LoginApi implements IBlinkApi {
         public record Auth(String token) {}
     }
 
-    public static String NAME = "LOGIN_API";
-    public static String LOGIN_API = BlinkConstants.PROD_URL + "/api/v5/account/login";
+    public static String NAME = "BLINK_LOGIN_API";
+    public static String LOGIN_API = Constants.BLINK_PROD_URL + "/api/v5/account/login";
 
     private final Body body;
 
-    public LoginApi(Body body) {
+    public BlinkLoginApi(Body body) {
         this.body = body;
     }
 
@@ -38,7 +40,7 @@ public class LoginApi implements IBlinkApi {
 
     @Override
     public String[] getHeaders() {
-        return BlinkConstants.CONTENT_TYPE_JSON;
+        return Constants.CONTENT_TYPE_JSON;
     }
 
     @Override
