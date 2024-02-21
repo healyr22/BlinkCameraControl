@@ -79,9 +79,12 @@ public class Monitor {
                     isDeviceOnline = false;
                     break;
                 }
+                if (line.toLowerCase().contains("unreachable")) {
+                    isDeviceOnline = false;
+                    break;
+                }
                 if (line.toLowerCase().startsWith("reply")) {
-                    // Device is online
-                    isDeviceOnline = !line.toLowerCase().contains("unreachable");
+                    isDeviceOnline = true;
                     break;
                 }
             } ///// CANNOT RELY ON STATE FOR ARMED - need to check? Maybe execute only if we did it last or something...
