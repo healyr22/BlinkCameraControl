@@ -1,6 +1,6 @@
 package com.robware.blink;
 
-import com.robware.models.BlinkState;
+import com.robware.models.State;
 import com.robware.network.IApi;
 import com.robware.util.InputUtil;
 
@@ -13,7 +13,7 @@ public abstract class AbstractBlinkApi implements IApi {
             return false;
         }
 
-        final String uuid = BlinkState.get().getUuid();
+        final String uuid = State.get().getBlinkUuid();
 
         // TODO add timeout for these
         var email = InputUtil.getInput("Please enter your Blink account email address:");
@@ -28,7 +28,7 @@ public abstract class AbstractBlinkApi implements IApi {
         BlinkLoginApi.Response loginResponse = loginApi.call();
 
         // Update token
-        BlinkState.updateAuthToken(loginResponse.auth().token());
+        State.updateAuthToken(loginResponse.auth().token());
 
         System.out.println("Successfully refreshed token");
         return true;

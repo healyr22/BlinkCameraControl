@@ -1,6 +1,7 @@
 package com.robware.blink;
 
 import com.robware.network.HttpMethod;
+import com.robware.util.Constants;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class BlinkHomeScreenApi extends AbstractBlinkApi {
 
     @Override
     public String getApiUrl() {
-        return BlinkConstants.getTierUrl(tier) +
+        return Constants.getBlinkTierUrl(tier) +
                 "/api/v3/accounts/" +
                 accountId +
                 "/homescreen";
@@ -40,7 +41,7 @@ public class BlinkHomeScreenApi extends AbstractBlinkApi {
 
     @Override
     public String[] getHeaders() {
-        return List.of(BlinkConstants.AUTH_HEADER, authToken).toArray(new String[2]);
+        return List.of(Constants.BLINK_AUTH_HEADER, authToken).toArray(new String[2]);
     }
 
     @Override

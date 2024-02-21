@@ -1,68 +1,60 @@
 package com.robware.models;
 
-import com.robware.blink.BlinkNetworkAction;
 import com.robware.blink.BlinkHomeScreenApi;
 import com.robware.blink.BlinkLoginApi;
+import com.robware.blink.BlinkNetworkAction;
 import com.robware.blink.BlinkVerifyClientApi;
 import com.robware.util.InputUtil;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
-public class BlinkState {
+@Builder(toBuilder = true)
+public class State {
 
-    private String authToken;
+    private String blinkAuthToken;
 
-    private String uuid;
+    private String blinkUuid;
 
-    private String accountId;
+    private String blinkAccountId;
 
-    private String clientId;
+    private String blinkClientId;
 
-    private String tier;
+    private String blinkTier;
 
-    private String networkId;
+    private String blinkNetworkId;
 
-    private BlinkNetworkAction previousAction;
+    private BlinkNetworkAction blinkPreviousAction;
 
-    private static BlinkState instance;
+    private String pushbulletAccessToken;
 
-    public static BlinkState get() {
+    private static State instance;
+
+    public static State get() {
         if(instance == null) {
             init();
         }
         return instance;
     }
 
-    public static void set(BlinkState state) {
+    public static void set(State state) {
         instance = state;
     }
 
     public static void updateAction(BlinkNetworkAction updateAction) {
-        BlinkState currentState = get();
-        set(new BlinkState(
-                currentState.getAuthToken(),
-                currentState.getUuid(),
-                currentState.getAccountId(),
-                currentState.getClientId(),
-                currentState.getTier(),
-                currentState.getNetworkId(),
-                updateAction));
+        State currentState = get();
+        set(currentState.toBuilder()
+                .blinkPreviousAction(updateAction)
+                .build());
     }
 
     public static void updateAuthToken(String authToken) {
-        BlinkState currentState = get();
-        set(new BlinkState(
-                authToken,
-                currentState.getUuid(),
-                currentState.getAccountId(),
-                currentState.getClientId(),
-                currentState.getTier(),
-                currentState.getNetworkId(),
-                currentState.getPreviousAction()));
+        State currentState = get();
+        set(currentState.toBuilder()
+                .blinkAuthToken(authToken)
+                .build());
     }
 
     private static void init() {
@@ -71,6 +63,7 @@ public class BlinkState {
         var uuid = UUID.randomUUID().toString();
         var email = InputUtil.getInput("Please enter your Blink account email address:");
         var password = InputUtil.getInput("Please enter your password:");
+        var pushbulletAccessToken = InputUtil.getInput("Please enter your pushbullet access token:");
 
         var loginApi = new BlinkLoginApi(new BlinkLoginApi.Body(
                 uuid,
@@ -93,16 +86,15 @@ public class BlinkState {
 
         BlinkHomeScreenApi.Response hsResponse = hsApi.call();
 
-        var blinkState = new BlinkState(
+        State.set(new State(
                 loginResponse.auth().token(),
                 uuid,
                 loginResponse.account().account_id(),
                 loginResponse.account().client_id(),
                 loginResponse.account().tier(),
                 hsResponse.networks().get(0).id(),
-                null);
-        BlinkState.set(blinkState);
-
-        instance = blinkState;
+                null,
+                pushbulletAccessToken
+        ));
     }
 }

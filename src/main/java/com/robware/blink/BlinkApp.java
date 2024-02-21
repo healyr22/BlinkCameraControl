@@ -1,13 +1,13 @@
 package com.robware.blink;
 
-import com.robware.models.BlinkState;
+import com.robware.models.State;
 
 public class BlinkApp {
 
     public static void update(BlinkNetworkAction updateAction) {
         System.out.println("Starting BlinkApp - action: " + updateAction);
 
-        if(BlinkState.get().getPreviousAction() == updateAction) {
+        if(State.get().getBlinkPreviousAction() == updateAction) {
             System.out.println("Duplicate action - exiting");
             return;
         }
@@ -16,7 +16,7 @@ public class BlinkApp {
         new BlinkNetworkStateApi(updateAction.getUrlString()).call();
 
         // Update state
-        BlinkState.updateAction(updateAction);
+        State.updateAction(updateAction);
 
         System.out.println("Complete!");
     }

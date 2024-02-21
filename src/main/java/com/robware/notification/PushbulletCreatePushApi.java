@@ -1,27 +1,25 @@
-package com.robware.blink;
+package com.robware.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.robware.json.JsonMapper;
+import com.robware.models.State;
 import com.robware.network.HttpMethod;
+import com.robware.network.IApi;
 import com.robware.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlinkVerifyClientApi extends AbstractBlinkApi {
+public class PushbulletCreatePushApi implements IApi {
 
-    public record Body(String pin) {}
+    public record Body(String type, String title, String body, String device_iden) {}
 
-    public static String NAME = "VERIFY_CLIENT_API";
+    private static final String URL = "https://api.pushbullet.com/v2/pushes";
+    public static String NAME = "PUSHBULLET_CREATE_PUSH_API";
 
-    private final String accountId, clientId, tier, authToken;
     private final Body body;
 
-    public BlinkVerifyClientApi(String accountId, String clientId, String tier, String authToken, Body body) {
-        this.accountId = accountId;
-        this.clientId = clientId;
-        this.tier = tier;
-        this.authToken = authToken;
+    public PushbulletCreatePushApi(Body body) {
         this.body = body;
     }
 
@@ -32,12 +30,7 @@ public class BlinkVerifyClientApi extends AbstractBlinkApi {
 
     @Override
     public String getApiUrl() {
-        return Constants.getBlinkTierUrl(tier) +
-                "/api/v4/account/" +
-                accountId +
-                "/client/" +
-                clientId +
-                "/pin/verify";
+        return URL;
     }
 
     @Override
@@ -47,15 +40,17 @@ public class BlinkVerifyClientApi extends AbstractBlinkApi {
 
     @Override
     public String[] getHeaders() {
+        var state = State.get();
         var headers = new ArrayList<>(List.of(Constants.CONTENT_TYPE_JSON));
-        headers.add(Constants.BLINK_AUTH_HEADER);
-        headers.add(authToken);
-        return headers.toArray(new String[4]);
+        headers.add(Constants.PUSHBULLET_AUTH_HEADER);
+        headers.add(state.getPushbulletAccessToken());
+        return headers.toArray(new String[2]);
     }
 
     @Override
     public String getBody() {
         try {
+            System.out.println("[ROB_DEBUG] Sending " + JsonMapper.mapper().writeValueAsString(this.body));
             return JsonMapper.mapper().writeValueAsString(this.body);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
