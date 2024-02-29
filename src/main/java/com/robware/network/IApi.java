@@ -28,21 +28,21 @@ public interface IApi {
             if(response.getValue0() == 401) {
                 // Unauthorized - try to refresh auth
                 if(refreshAuth()) {
-                    System.out.println("Attempting to refresh auth...");
+//                    System.out.println("Attempting to refresh auth...");
                     response = call0();
                 }
             }
 
             if (response.getValue0() == 200) {
-                return JsonMapper.mapper().readValue(response.getValue1(), getResponseClass());
+                return parseRawResponse(response.getValue1());
             }
 
             // Error response
             if(!response.getValue0().toString().startsWith("4") && retryCount < MAX_RETRIES) {
                 // Wait then retry call
-                System.out.println("Request failed. Will retry in " + RETRY_COOLDOWN_SECONDS + " seconds...");
+//                System.out.println("Request failed. Will retry in " + RETRY_COOLDOWN_SECONDS + " seconds...");
                 Thread.sleep(RETRY_COOLDOWN_SECONDS * 1000);
-                System.out.println("Retrying " + (MAX_RETRIES-retryCount) + " more time(s)...");
+//                System.out.println("Retrying " + (MAX_RETRIES-retryCount) + " more time(s)...");
                 return callWithRetries(retryCount + 1);
             }
 
@@ -80,14 +80,18 @@ public interface IApi {
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
-            System.out.println("Status Code: " + statusCode);
-            System.out.println("Response Body: " + responseBody);
+//            System.out.println("Status Code: " + statusCode);
+//            System.out.println("Response Body: " + responseBody);
 
             return Pair.with(statusCode, responseBody);
 
         } catch (Exception e) {
             throw new RuntimeException("Error calling api: " + getName(), e);
         }
+    }
+
+    default <T> T parseRawResponse(String rawResponse) throws JsonProcessingException {
+        return JsonMapper.mapper().readValue(rawResponse, getResponseClass());
     }
 
     <T> Class<T> getResponseClass();
@@ -98,7 +102,9 @@ public interface IApi {
 
     HttpMethod getMethod();
 
-    String[] getHeaders();
+    default String[] getHeaders() {
+        return new String[] {"no", "headers"};
+    }
 
     default String getBody() {
         return null;

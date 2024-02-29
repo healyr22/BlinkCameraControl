@@ -2,6 +2,7 @@ package com.robware;
 
 import com.robware.blink.BlinkNetworkAction;
 import com.robware.blink.BlinkNetworkStateApi;
+import com.robware.externalip.ExternalIpApi;
 import com.robware.models.State;
 import com.robware.notification.PushbulletManager;
 import com.robware.util.Constants;
@@ -19,12 +20,20 @@ public class Monitor {
 
     public static void main(String[] args) throws InterruptedException {
         PushbulletManager pushbulletManager = new PushbulletManager();
+        String externalIp = null;
 
         try {
             while (true) {
-                boolean isDeviceOnline = isDeviceOnline();
-                updateBlink(getAction(isDeviceOnline));
-                Thread.sleep(30000);
+//                boolean isDeviceOnline = isDeviceOnline();
+//                updateBlink(getAction(isDeviceOnline));
+
+                String newExternalIp = new ExternalIpApi().call();
+                if(!newExternalIp.equals(externalIp)) {
+                    externalIp = newExternalIp;
+                    pushbulletManager.push("New External IP!", externalIp);
+                }
+
+                Thread.sleep(600000);
             }
         } catch(Exception e) {
             StringWriter sw = new StringWriter();

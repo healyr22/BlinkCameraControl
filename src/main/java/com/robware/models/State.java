@@ -65,34 +65,34 @@ public class State {
         var password = InputUtil.getInput("Please enter your password:");
         var pushbulletAccessToken = InputUtil.getInput("Please enter your pushbullet access token:");
 
-        var loginApi = new BlinkLoginApi(new BlinkLoginApi.Body(
-                uuid,
-                email,
-                password,
-                true
-        ));
-        BlinkLoginApi.Response loginResponse = loginApi.call();
-
-        if(loginResponse.account().client_verification_required()) {
-            String pin = InputUtil.getInput("Please enter the code sent to your email or phone:");
-            var verifyApi = new BlinkVerifyClientApi(loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), loginResponse.auth().token(), new BlinkVerifyClientApi.Body(pin));
-            verifyApi.call();
-        }
-
-        BlinkHomeScreenApi hsApi = new BlinkHomeScreenApi(
-                loginResponse.account().account_id(),
-                loginResponse.account().tier(),
-                loginResponse.auth().token());
-
-        BlinkHomeScreenApi.Response hsResponse = hsApi.call();
+//        var loginApi = new BlinkLoginApi(new BlinkLoginApi.Body(
+//                uuid,
+//                email,
+//                password,
+//                true
+//        ));
+//        BlinkLoginApi.Response loginResponse = loginApi.call();
+//
+//        if(loginResponse.account().client_verification_required()) {
+//            String pin = InputUtil.getInput("Please enter the code sent to your email or phone:");
+//            var verifyApi = new BlinkVerifyClientApi(loginResponse.account().account_id(), loginResponse.account().client_id(), loginResponse.account().tier(), loginResponse.auth().token(), new BlinkVerifyClientApi.Body(pin));
+//            verifyApi.call();
+//        }
+//
+//        BlinkHomeScreenApi hsApi = new BlinkHomeScreenApi(
+//                loginResponse.account().account_id(),
+//                loginResponse.account().tier(),
+//                loginResponse.auth().token());
+//
+//        BlinkHomeScreenApi.Response hsResponse = hsApi.call();
 
         State.set(new State(
-                loginResponse.auth().token(),
+                null,
                 uuid,
-                loginResponse.account().account_id(),
-                loginResponse.account().client_id(),
-                loginResponse.account().tier(),
-                hsResponse.networks().get(0).id(),
+                null,
+                null,
+                null,
+                null,
                 null,
                 pushbulletAccessToken
         ));

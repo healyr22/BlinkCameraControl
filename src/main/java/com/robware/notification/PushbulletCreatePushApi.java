@@ -50,7 +50,7 @@ public class PushbulletCreatePushApi implements IApi {
     @Override
     public String getBody() {
         try {
-            System.out.println("[ROB_DEBUG] Sending " + JsonMapper.mapper().writeValueAsString(this.body));
+//            System.out.println("[ROB_DEBUG] Sending " + JsonMapper.mapper().writeValueAsString(this.body));
             return JsonMapper.mapper().writeValueAsString(this.body);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
