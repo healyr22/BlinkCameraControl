@@ -46,12 +46,12 @@ public interface IApi {
                 return callWithRetries(retryCount + 1);
             }
 
-            throw new NetworkException(response.getValue0(), "Error response from API. Code: " + response.getValue0() + " - Response: " + response.getValue1());
+            throw new NetworkException(response.getValue0(), "[" + getName() + "] Error response from API. Code: " + response.getValue0() + " - Response: " + response.getValue1());
 
         } catch(JsonProcessingException e) {
-            throw new RuntimeException("Error parsing JSON response", e);
+            throw new RuntimeException("[" + getName() + "] Error parsing JSON response", e);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("[" + getName() + "]", e);
         }
     }
 
